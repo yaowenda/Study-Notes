@@ -3,11 +3,11 @@ Vue.js - 渐进式JavaScript 框架
     <script setup>
     // 写javascript的地方
     </script>
-
+    
     <template>
         <!-- 写html的地方 -->
     </template>
-
+    
     <style scoped>
     /* 写css的地方 */
     </style>
@@ -28,7 +28,7 @@ Vue.js - 渐进式JavaScript 框架
 
     <script>
     import { ref } from "vue";
-
+    
     const str = ref('dadas') 
     </script>
 
@@ -49,7 +49,7 @@ Vue.js - 渐进式JavaScript 框架
         }
     
     </script>
-
+    
     <div @click="add" class="todo-button">Add todo</div>
 
 鼠标移入：@mouseenter 鼠标移出：@mouseleave
@@ -61,19 +61,19 @@ Vue.js - 渐进式JavaScript 框架
         <input v-model="str" class="todo-input" type="text" placeholder="请输入待办事项">
         <div @click="add" class="todo-button">Add todo</div>
     </div>
-
+    
     <script setup>
     import { ref } from "vue";
     const str = ref("") //清空
     function add() {
         console.log(str.value);
     }
-  
+      
     </script>
 
 输入框输入的内容会绑定到str中，当点击按钮时被输出
 
-![alt text](image.png)
+![alt text](assets/image.png)
 
 既然叫双向绑定，那么当str的值改变时，input中的值也会改变
 
@@ -82,7 +82,7 @@ Vue.js - 渐进式JavaScript 框架
         const str = ref("")
         function add() {
             console.log(str.value);
-
+    
             str.value = "12345"
         }
     
@@ -90,7 +90,7 @@ Vue.js - 渐进式JavaScript 框架
 
 当点击按钮，输入框中的值也会变成12345
 
-![alt text](image-1.png)
+![alt text](assets/image-1.png)
 
 双向绑定还可以用于其他地方
 
@@ -98,13 +98,13 @@ Vue.js - 渐进式JavaScript 框架
         <input v-model="str" type="checkbox">
         <span class="name">吃饭</span>
     </div>
-
+    
     <script setup>
     import { ref } from "vue";
     const str = ref(true)
     function add() {
         console.log(str.value);
-
+    
         str.value = !str.value
     }
     </script>
@@ -115,7 +115,7 @@ Vue.js - 渐进式JavaScript 框架
 
 动态绑定类名：
 
-![alt text](image-2.png)
+![alt text](assets/image-2.png)
 
 实现当打钩，则变透明，不打勾则正常透明度
 
@@ -126,11 +126,11 @@ Vue.js - 渐进式JavaScript 框架
         const str = ref('item') // 初始时item样式
         function add() {
             console.log(str.value);
-
+    
             str.value = 'complete' // 打勾时complete样式
         }
     </script>
-
+    
     <div :class="str"> <!-- 动态绑定类名 -->
             <div>
                 <input @click="add" type="checkbox">
@@ -148,13 +148,13 @@ Vue.js - 渐进式JavaScript 框架
         </div>
             <div class="del">del</div>
     </div>
-
+    
     <script setup>
     import { ref } from "vue";
     const str = ref(true)
     function add() {
         console.log(str.value);
-
+    
         str.value = !str.value;
     }
     </script>
@@ -167,12 +167,12 @@ Vue.js - 渐进式JavaScript 框架
         import { ref } from "vue";
         // const str = ref(true)
         const list = ref(['吃饭', '睡觉', '打豆豆'])
-
+    
         // function add() {
         //     str.value = !str.value
         // }
     </script>
-
+    
     <div v-for="(item, index) in list" 
         :key="index"
         :class="[str? 'item' : 'complete']">
@@ -196,7 +196,7 @@ Vue.js - 渐进式JavaScript 框架
         }
         watch(str, add)
     </script>
-
+    
     <div class="todo-form">
         <input v-model="str" class="todo-input" type="text" placeholder="请输入待办事项">
         <div @click="add" class="todo-button">Add todo</div>
@@ -204,7 +204,7 @@ Vue.js - 渐进式JavaScript 框架
 
 由于双向绑定，当输入时，变量str发生变化，就会执行add函数
 
-![alt text](image-3.png)
+![alt text](assets/image-3.png)
 
 #### 深度侦听（侦听对象）
 现在侦听一个对象：
@@ -219,7 +219,7 @@ Vue.js - 渐进式JavaScript 框架
         }
         watch(str, add)
     </script>
-
+    
     <input v-model="str.text" class="todo-input" type="text" placeholder="请输入待办事项">
 
 发现当输入框发生变化，并不会触发add函数，这是因为侦听的是一个对象，对象并没有变，是对象的属性变了，所以需要使用深度侦听：
@@ -233,12 +233,12 @@ watch(str, add, {deep: true})
 
     <script setup>
     </script>
-
+    
     <template>
         <div class="BaseButton">点我</div>
-
+    
     </template>
-
+    
     <style scope>
         .BaseButton{
             width: 50px;
@@ -259,7 +259,7 @@ watch(str, add, {deep: true})
         import BaseButton from '@/components/BaseButton.vue'
         //被导入的组件叫做子组件
     </script>
-
+    
     <template>
         <BaseButton></BaseButton>
         <BaseButton></BaseButton>
@@ -267,7 +267,7 @@ watch(str, add, {deep: true})
         
     </template>
 
-![alt text](image-4.png)
+![alt text](assets/image-4.png)
 
 那么如何改变按钮的文字呢？
 
@@ -281,10 +281,10 @@ props 是父组件向子组件传递数据的方式，子组件通过 props 接�
         import {defineProps} from 'vue'
         const props = defineProps(['text']) //可以定义多个props
     </script>
-
+    
     <template>
         <div class="BaseButton">{{ props.text }}</div>
-
+    
     </template>
 
 父组件：
@@ -294,8 +294,9 @@ props 是父组件向子组件传递数据的方式，子组件通过 props 接�
         <BaseButton text="他好"></BaseButton>
         
         <BaseButton text="大家好"></BaseButton>
-        
-        
+
+
+​        
 
     </template>
 
@@ -307,15 +308,15 @@ props 是父组件向子组件传递数据的方式，子组件通过 props 接�
         import {defineProps, defineEmits} from 'vue'
         const props = defineProps(['text']) //可以定义多个props
         const emit = defineEmits(['ok'])
-
+    
         function send() {
             emit('ok', 'hello')
         }
     </script>
-
+    
     <template>
         <div @click="send" class="BaseButton">{{ props.text }}</div>
-
+    
     </template>
 
 首先，从vue中引入了一个工具类defineEmits，用来定义emit事件，然后定义了一个事件叫ok，当点击按钮，就执行send函数，send函数中调用emit函数，emit发出ok事件，并带一个参数hello
@@ -329,7 +330,7 @@ props 是父组件向子组件传递数据的方式，子组件通过 props 接�
             
         }
     </script>
-
+    
     <template>
         <BaseButton @ok="add" text="你好"></BaseButton>
 

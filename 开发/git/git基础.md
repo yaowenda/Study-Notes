@@ -10,15 +10,15 @@ vi vi编辑器
 
 ## git常用命令
 
-![alt text](image.png)
+![alt text](assets/image.png)
 
 进入本地仓库之前必须先进暂存区
 
-![alt text](image-1.png)
+![alt text](assets/image-1.png)
 
 git log [option] 命令可以查看提交记录：
 
-![alt text](image-2.png)
+![alt text](assets/image-2.png)
 
 option:
     --all: 显示所有提交记录
@@ -32,14 +32,14 @@ option:
 git reset --hard [commitid]
 commitid可以通过`git-log`查看
 
-![alt text](image-3.png)
+![alt text](assets/image-3.png)
 
 这样就回退到了修改之前
 
 #### 怎么回来？
 同理：
 
-![alt text](image-4.png)
+![alt text](assets/image-4.png)
 
 但是如果自己把提交记录删除了，可以通过`git reflog`查看前面所有的操作
 
@@ -53,12 +53,14 @@ commitid可以通过`git-log`查看
 新建一个分支：git branch [branchname]
 查看分支中提交的内容：git-log 就可以查看
 
-![alt text](image-5.png)
+![alt text](assets/image-5.png)
+
 从中可以看出master分支和dev01分支都有两次提交，**HEAD指向谁谁就是当前的分支**
 
 在工作区看到的只能是一个分支
 
-![alt text](image-6.png)
+![alt text](assets/image-6.png)
+
 我提交了.gitignore文件，但提交到了master分支而不是dev01分支，切换回dev01分支就没有.gitignore文件
 
 ### 如何切换分支

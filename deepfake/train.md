@@ -25,7 +25,7 @@ Epoch 就是“完整看一遍所有数据”，如果我们有 100 张图像，
 
 ## 方法
 
-![alt text](983b38d41aa2cbd2dcab62b03704350f_2_Figure_2.png)
+![alt text](assets/983b38d41aa2cbd2dcab62b03704350f_2_Figure_2.png)
 
 
 输入是可疑的假人脸 H x W x C (c = 3)
@@ -50,7 +50,7 @@ Query（Q）：表示当前 patch 需要关注的信息
 Key（K）：表示所有 patch 提供的信息
 Value（V）：表示所有 patch 的实际特征信息
 
-![alt text](image.png)
+![alt text](assets/image.png)
 
 **还原为原始大小**
 计算完注意力后，得到 A^h_i，然后把它重新变成和输入图像相同的空间大小。

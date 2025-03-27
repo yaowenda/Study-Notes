@@ -4,7 +4,7 @@
 如果有个盒子（div），我想设置它的样式，可以这样：
 
     <div></div>
-
+    
     <style>
         div {
             width: 100px;
@@ -18,8 +18,9 @@
         <div class="box"></div>
         <div class="box1"></div>
         <div class="box"></div>
-        
-        
+
+
+​        
         <style>
             .box {
                 width: 100px;
@@ -36,7 +37,8 @@
 
 style中在类名前面加了个.
 margin-top: 10px;为上边距
-![alt text](image.png)
+
+![alt text](assets/image.png)
 
 颜色可以用英文单词表示，还可以用rgb表示，还可以用16进制表示，还可以用hsl（色相、饱和度、亮度）表示。
 
@@ -53,7 +55,7 @@ margin-top: 10px;为上边距
     </head>
     <body>
         <div class="todo-app">
-
+    
         </div>
         
         <style>
@@ -64,17 +66,17 @@ margin-top: 10px;为上边距
                 width: 98%;
                 height: 500px;
                 background-color: #ffff;
-
+    
                 border: 1px solid #ccc; /* 可选：添加边框 */
                 border-radius: 15px; /* 设置圆角半径 */
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 可选：添加阴影 */
             }
         </style>
-
+    
     </body>
     </html>
 
-![alt text](image-1.png)
+![alt text](assets/image-1.png)
 
 **border: 1px solid #ccc;**
 border: 这个属性用于设置元素的边框。
@@ -93,14 +95,14 @@ rgba(0, 0, 0, 0.1): 表示阴影的颜色为黑色，透明度为 0.1（即 10%�
 同理左边距就是**margin-left**
 
 我们暂时想要做的效果是这样的：
-![alt text](image-2.png)
+![alt text](assets/image-2.png)
 
 可以看到有一个标题，因为这个标题是在div盒子里面的，所以需要在div里面再建一个div。此后我们需要让他居中，让他上面有一定的空间，还要改字体的大小。
 
     <div class="todo-app">
         <div class="title">姚文达的todo list</div>
     </div>
-
+    
     .todo-app {
             width: 98%;
             height: 500px;
@@ -132,11 +134,11 @@ rgba(0, 0, 0, 0.1): 表示阴影的颜色为黑色，透明度为 0.1（即 10%�
         <div class="todo-button">add todo</div>
     </div>
 
-![alt text](image-3.png)
+![alt text](assets/image-3.png)
 
 应该是左右排列才对，这就是为什么在两个元素的外面加了个div，这个div就是用来设置排列方式的。当我们想要两个元素横着排，我们给他外面的盒子加上**display: flex;** 就行。
 
-![alt text](image-4.png)
+![alt text](assets/image-4.png)
 
 输入框的样式：
 
@@ -189,7 +191,7 @@ button的样式：
                 padding: 16px;
                 box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 20px;
                 border-radius: 20px;
-
+    
                 align-items: center;
                 justify-content: space-between;
             }
@@ -200,7 +202,11 @@ button的样式：
 `align-items: center;`表示元素垂直居中。
 `justify-content: space-between;`表示将元素平分空间。
 
-![alt text](image-5.png)
+
+
+![alt text](assets/image-5.png)
+
+
 
 为了实现想要的效果，把HTML改成：
 
@@ -212,7 +218,7 @@ button的样式：
         <div class="del">del</div>
     </div>
 
-![alt text](image-6.png)
+![alt text](assets/image-6.png)
 
 需要把div改成span，div默认是竖着排，span默认是横着排。
 
@@ -226,7 +232,7 @@ button的样式：
 
 想实现这样的效果：
 
-![alt text](image-7.png)
+![alt text](assets/image-7.png)
 
 **一个div可以同时拥有两个属性**，所以给第一个div添加以下样式：
 
