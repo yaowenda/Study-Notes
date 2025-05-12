@@ -472,3 +472,32 @@ int main() {
 }
 ```
 
+
+### 输入输出函数
+
+
+
+### 结构体
+
+```cpp
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//结构体
+struct _SINFO {
+    char szName[50];
+    int nAge;
+};
+
+
+int main() {
+    struct _SINFO sobj = { 0 };
+    strcpy_s(sobj.szName, "dada");
+    sobj.nAge = 500;
+    printf("%s-%d\r\n", sobj.szName, sobj.nAge);
+
+    return 0;
+}
+```
+
