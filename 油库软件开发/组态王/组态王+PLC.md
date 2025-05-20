@@ -43,3 +43,15 @@ ushort 16位 无符号整数
 BCD BCD码 4位
 
 LONG 32位
+
+
+
+### 组态王与三菱PLC FX3U
+
+使用FX3U的编程电缆连接PLC与PC机，在GX Works2软件中设置FX3U的编程口通讯参数，通讯下载项目程序
+
+FX3U下载线：USB-SC09-FX
+
+
+
+![image-20250520131000445](assets/image-20250520131000445.png)
