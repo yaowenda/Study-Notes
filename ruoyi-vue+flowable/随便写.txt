@@ -19,3 +19,144 @@ axios.get(API+trainCode).then(function(res){
 唯一名称：employeeCompany
 
 select68721
+
+
+
+```
+BEGIN
+		DECLARE sequence_number INT;
+    DECLARE new_gonghao VARCHAR(20);
+		DECLARE companyCode VARCHAR(50);
+		-- 如果开头是0，则把0删除 例如 01 变成 1
+		SELECT REGEXP_REPLACE(company_code, '^0+', '') INTO companyCode
+		FROM company_dictionary
+		WHERE company_name = NEW.employee_company;
+
+		IF NEW.manager_result = '同意' THEN
+			SELECT COUNT(*) + 1
+			INTO sequence_number
+			FROM personnel_management_people;
+		
+			IF sequence_number <= 999 THEN
+            SET NEW.gonghao = CASE 
+							WHEN LENGTH(companyCode) = 1 THEN 
+								CONCAT(companyCode, LPAD(sequence_number, 4, '0'))
+							ELSE 
+								CONCAT(companyCode, LPAD(sequence_number, 3, '0'))
+						END;
+        ELSE
+            SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = '工号超出了数值范围，请联系管理员';
+        END IF;
+		END IF;
+		
+END
+```
+
+
+
+审批编号
+
+物资类别
+
+物资项目
+
+物资名称
+
+入库部门
+
+生产厂家
+
+型号
+
+规格
+
+物资编号
+
+计量单位
+
+入库数量
+
+单价
+
+合价
+
+制造日期
+
+入库日期
+
+存放地点
+
+用途
+
+物资状态
+
+保管人
+
+
+
+
+
+机车配件
+
+办公用品
+
+食堂用品
+
+工具仪表
+
+工装机具
+
+专用设备
+
+燃油
+
+油脂
+
+电务配件
+
+工务配件
+
+机车耗材
+
+通用料
+
+车辆配件
+
+施工材料
+
+计算机设备
+
+安全设备
+
+消防设备
+
+
+
+
+
+
+
+**培训记录**
+
+**综合管理--发放台账**
+
+乘务员出勤
+
+乘务员退勤
+
+机车检修
+
+机车整修
+
+工务中大修
+
+机统28录入
+
+电务维修
+
+工务维修记录
+
+电务设备技术资料
+
+技术管理--工务备品台账
