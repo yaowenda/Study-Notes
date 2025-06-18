@@ -46,7 +46,7 @@ public class User {
 
 ```
 
-获取类的方法
+### 获取类
 
 GetClass类
 
@@ -83,7 +83,7 @@ public class GetClass {
 
 
 
-**利用反射获取成员变量**
+### 利用反射获取成员变量
 
 Class类中用于获取成员变量的方法
 
@@ -162,7 +162,7 @@ Jerry
 
 
 
-**利用反射获取构造方法**
+### 利用反射获取构造方法
 
 Class类中用于获取构造方法的方法
 
@@ -241,3 +241,26 @@ Object invoke(Object obj, Object... args): 运行方法
 - 参数一：用`obj`对象调用该方法
 - 参数二：调用方法的传递的参数（如果没有就不写）
 - 返回值：方法的返回值（如果没有就不写）
+
+
+
+```java
+public class GetMethod {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class clazz = Class.forName("com.example.reflectdemo.User");
+
+        User u = new User();
+        Method method = clazz.getDeclaredMethod("users", String.class, int.class);
+        method.invoke(u,"tom22", 23);
+    }
+}
+
+```
+
+user成员方法运行的：tom22
+user成员方法运行的：23
+
+
+
+## 利用反射实现命令执行
+
