@@ -264,3 +264,26 @@ user成员方法运行的：23
 
 ## 利用反射实现命令执行
 
+```java
+public class GetRunExec {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        //原生调用
+//        Runtime.getRuntime().exec("calc");//弹出计算器
+        //Runtime是jdk带的，rt.jar
+
+        //如果是第三方的jar呢？那就要按流程
+        Class aClass = Class.forName("java.lang.Runtime");
+//        Method[] methods = aClass.getMethods();
+//        for (Method method : methods){
+//            System.out.println(method);
+//        }
+        //获取exec成员方法
+        Method exec = aClass.getMethod("exec", String.class);
+        //获取Runtime成员方法
+        Method getRuntimeMethod = aClass.getMethod("getRuntime");
+        Object runtime = getRuntimeMethod.invoke(aClass);
+        exec.invoke(runtime,"calc");
+    }
+}
+```
+
