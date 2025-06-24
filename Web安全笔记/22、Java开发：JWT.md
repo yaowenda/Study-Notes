@@ -1,4 +1,4 @@
-JWT
+## JWT
 
 <img src="assets/image-20250623184438825.png" alt="image-20250623184438825" style="zoom: 80%;" />
 
@@ -181,3 +181,17 @@ Content-Type: application/json
 ```
 
 客户端在每次请求时带上这个 JWT（通常放在 `Authorization` 请求头中）。服务器收到请求后，**不检查用户名和密码了**，而是验证 JWT 是否合法（签名是否有效、是否过期等）。如果验证通过，就信任其中的用户信息（如 `user_id` 或 `username`），并进行业务处理。
+
+
+
+CVE-2015-2951 签名算法能被修改为none
+
+non e算法生成的JWT token只有两部分，没有签名部分。没有秘钥黑客就可以实施攻击了
+
+
+
+## 源码打包jar
+
+拿到jar怎么看？
+
+解压之后用idea打开文件夹
