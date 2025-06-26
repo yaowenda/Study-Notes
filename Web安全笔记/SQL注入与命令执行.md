@@ -62,7 +62,7 @@ mySQL注释：#  --空格 --+ %23 四种
 
 Id=11 数字型
 
-id=’11’ 字符型
+id='11'字符型
 
  
 
@@ -104,7 +104,7 @@ https ://www.hetianlab.com/pages/search.jsp?wk=sql
 
 **再判断闭合方式**
 
-?id=1asdf’
+?id=1asdf'
 
 看报错信息
 
@@ -116,7 +116,9 @@ https ://www.hetianlab.com/pages/search.jsp?wk=sql
 
 单引号 双引号 括号都是成双出现的
 
-​      Id前面为什么要加？ get方式传参 传递叫id的参数，值为=后面的
+Id前面为什么要加？ get方式传参 传递叫id的参数，值为=后面的
+
+
 
  ![image-20250327221203702](assets/image-20250327221203702.png)
 
@@ -132,7 +134,7 @@ https ://www.hetianlab.com/pages/search.jsp?wk=sql
 
 
 
-？Id=1asdf还能运行说明是字符型
+?Id=1asdf还能运行说明是字符型
 
 后面加一个引号
 
