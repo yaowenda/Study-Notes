@@ -32,3 +32,9 @@ n x n * f x f，padding为p，strides为s
 多了一个/s
 
 **如果不能整除，向下取整，避免取到边缘之外的区域**
+
+
+
+文章：
+
+https://blog.csdn.net/fengzhuqiaoqiu/article/details/131254054
