@@ -3,3 +3,18 @@ delete from act_ru_task where PROC_INST_ID_ = '752597';
 delete from act_ru_identitylink where PROC_INST_ID_ = '752597';
 delete from act_ru_variable where PROC_INST_ID_ = '752597';
 delete from act_ru_execution where PROC_INST_ID_ = '752597';
+
+
+
+
+
+```vue
+<el-descriptions-item label="离职单扫描">
+              <button v-if="isValidFilePath(form.peoResignationTicket)" type="text"
+                @click="handleFileView(form.peoResignationTicket)">
+                <i class="el-icon-document"></i> 查看
+              </button>
+              <span v-else>{{ form.peoResignationTicket || '暂无' }}</span>
+            </el-descriptions-item>
+```
+

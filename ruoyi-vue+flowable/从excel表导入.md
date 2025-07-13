@@ -149,6 +149,9 @@ public class DirectoryCategoryExportExcel extends BaseEntity {
 服务层：
 
 ```java
+    @Autowired
+    protected Validator validator;
+
 /**
      * 导入数据
      *

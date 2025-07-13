@@ -9,6 +9,7 @@
               <span v-else>{{ scope.row.document }}</span>
             </div>
           </template>
+</el-table-column>
 ```
 
 ```vue
@@ -76,5 +77,15 @@ data() {
       return pathParts[pathParts.length - 1].split('.')[0];
     },
 
+```
+
+CSS:
+
+```
+.file-list {
+  display: flex; /* 开启 Flexbox */
+  flex-direction: column; /* 让文件项垂直排列 */
+  gap: 10px; /* 定义子项之间的间距 */
+}
 ```
 
