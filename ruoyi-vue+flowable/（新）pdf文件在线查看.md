@@ -12,6 +12,25 @@
 </el-table-column>
 ```
 
+或者
+
+
+
+```
+<el-form-item label="附件">
+  <template v-if="isValidFilePath(viewForm.commodityAttachments)">
+    <div v-for="(file, index) in getFilePathArray(viewForm.commodityAttachments)" :key="index">
+      <a :href="getFullUrl(file)" target="_blank" style="color: #409EFF; text-decoration: underline;">
+        {{ getFileName(file) }}
+      </a>
+    </div>
+  </template>
+  <span v-else>无附件</span>
+</el-form-item>
+```
+
+
+
 ```vue
 <!-- 文件选择对话框 -->
     <el-dialog title="请选择要查看的文件" :visible.sync="fileDialogVisible" width="30%" append-to-body>

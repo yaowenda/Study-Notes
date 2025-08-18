@@ -18,3 +18,36 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
             </el-descriptions-item>
 ```
 
+```vue
+<el-form-item label="订单状态" prop="orderStatus">
+          <el-select v-model="form.orderStatus" placeholder="请选择订单状态">
+            <el-option
+              v-for="dict in dict.type.order_status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="审批状态" prop="approvalStatus">
+          <el-select v-model="form.approvalStatus" placeholder="请选择审批状态">
+            <el-option
+              v-for="dict in dict.type.approval_status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="付款状态" prop="paymentStatus">
+          <el-select v-model="form.paymentStatus" placeholder="请选择付款状态">
+            <el-option
+              v-for="dict in dict.type.payment_status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+```
+
