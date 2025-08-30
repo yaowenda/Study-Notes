@@ -51,3 +51,86 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
         </el-form-item>
 ```
 
+
+
+
+
+```java
+/**
+     * 新增保存部门信息
+     * 
+     * @param dept 部门信息
+     * @return 结果
+     */
+    @Override
+    public int insertDept(SysDept dept)
+    {
+        SysDept info = deptMapper.selectDeptById(dept.getParentId());
+        // 如果父节点不为正常状态,则不允许新增子节点
+        if (!UserConstants.DEPT_NORMAL.equals(info.getStatus()))
+        {
+            throw new ServiceException("部门停用，不允许新增");
+        }
+        dept.setAncestors(info.getAncestors() + "," + dept.getParentId());
+        return deptMapper.insertDept(dept);
+    }
+
+    /**
+     * 修改保存部门信息
+     * 
+     * @param dept 部门信息
+     * @return 结果
+     */
+    @Override
+    public int updateDept(SysDept dept)
+    {
+        SysDept newParentDept = deptMapper.selectDeptById(dept.getParentId());
+        SysDept oldDept = deptMapper.selectDeptById(dept.getDeptId());
+        if (StringUtils.isNotNull(newParentDept) && StringUtils.isNotNull(oldDept))
+        {
+            String newAncestors = newParentDept.getAncestors() + "," + newParentDept.getDeptId();
+            String oldAncestors = oldDept.getAncestors();
+            dept.setAncestors(newAncestors);
+            updateDeptChildren(dept.getDeptId(), newAncestors, oldAncestors);
+        }
+        int result = deptMapper.updateDept(dept);
+        if (UserConstants.DEPT_NORMAL.equals(dept.getStatus()) && StringUtils.isNotEmpty(dept.getAncestors())
+                && !StringUtils.equals("0", dept.getAncestors()))
+        {
+            // 如果该部门是启用状态，则启用该部门的所有上级部门
+            updateParentDeptStatusNormal(dept);
+        }
+        return result;
+    }
+```
+
+
+
+```java
+/**
+     * 修改子元素关系
+     * 
+     * @param deptId 被修改的部门ID
+     * @param newAncestors 新的父ID集合
+     * @param oldAncestors 旧的父ID集合
+     */
+    public void updateDeptChildren(Long deptId, String newAncestors, String oldAncestors)
+    {
+        List<SysDept> children = deptMapper.selectChildrenDeptById(deptId);
+        for (SysDept child : children)
+        {
+            child.setAncestors(child.getAncestors().replaceFirst(oldAncestors, newAncestors));
+        }
+        if (children.size() > 0)
+        {
+            deptMapper.updateDeptChildren(children);
+        }
+    }
+```
+
+```sql
+<if test="deptId != null and deptId != 0">
+			AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+		</if>
+```
+
