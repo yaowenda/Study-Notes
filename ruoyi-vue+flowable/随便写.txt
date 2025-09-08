@@ -134,3 +134,36 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
 		</if>
 ```
 
+
+
+
+
+```js
+// 获取省级选项
+    fetchProvinceOptions() {
+      getProvince().then(response => {
+        this.provinceBuffer = response;
+      })
+    },
+    handleProvinceChange(row) {
+      this.cityBuffer = [];
+      this.countyBuffer = [];
+      row.addressCity = '';
+      row.addressCounty = '';
+      if (row.addressProvince) {
+        getCity(row.addressProvince).then(response => {
+          this.cityBuffer = response;
+        })
+      }
+    },
+    handleCityChange(row) {
+      this.countyBuffer = [];
+      row.addressCounty = '';
+      if (row.addressCity) {
+        getCounty(row.addressCity).then(response => {
+          this.countyBuffer = response;
+        })
+      }
+    },
+```
+
