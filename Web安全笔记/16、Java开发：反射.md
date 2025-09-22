@@ -137,7 +137,7 @@ public class GetField {
         Class aClass = Class.forName("com.example.reflectdemo.User");
 
         //获取公共成员变量name的值
-        User u = new User();
+        User u = new User(); //new了就会调用无参数的构造方法
         Field field = aClass.getField("name"); //返回单个公共成员变量对象
         Object a = field.get(u);//Field类的get(Object obj)方法用于获取指定对象obj中该字段（成员变量）的值
         System.out.println(a);
