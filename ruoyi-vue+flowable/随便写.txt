@@ -56,52 +56,10 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
 
 
 ```java
-/**
-     * 新增保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    @Override
-    public int insertDept(SysDept dept)
-    {
-        SysDept info = deptMapper.selectDeptById(dept.getParentId());
-        // 如果父节点不为正常状态,则不允许新增子节点
-        if (!UserConstants.DEPT_NORMAL.equals(info.getStatus()))
-        {
-            throw new ServiceException("部门停用，不允许新增");
-        }
-        dept.setAncestors(info.getAncestors() + "," + dept.getParentId());
-        return deptMapper.insertDept(dept);
-    }
-
-    /**
-     * 修改保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    @Override
-    public int updateDept(SysDept dept)
-    {
-        SysDept newParentDept = deptMapper.selectDeptById(dept.getParentId());
-        SysDept oldDept = deptMapper.selectDeptById(dept.getDeptId());
-        if (StringUtils.isNotNull(newParentDept) && StringUtils.isNotNull(oldDept))
-        {
-            String newAncestors = newParentDept.getAncestors() + "," + newParentDept.getDeptId();
-            String oldAncestors = oldDept.getAncestors();
-            dept.setAncestors(newAncestors);
-            updateDeptChildren(dept.getDeptId(), newAncestors, oldAncestors);
-        }
-        int result = deptMapper.updateDept(dept);
-        if (UserConstants.DEPT_NORMAL.equals(dept.getStatus()) && StringUtils.isNotEmpty(dept.getAncestors())
-                && !StringUtils.equals("0", dept.getAncestors()))
-        {
-            // 如果该部门是启用状态，则启用该部门的所有上级部门
-            updateParentDeptStatusNormal(dept);
-        }
-        return result;
-    }
+<el-table-column label="生产厂家" prop="clientName" width="100px" />
+        <el-table-column label="品牌" prop="commodityBrand" width="130px" />
+        <el-table-column label="型号" prop="commodityModel" width="130px" />
+        <el-table-column label="规格" prop="commoditySpecification" width="400px" />
 ```
 
 
@@ -138,32 +96,53 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
 
 
 
-```js
-// 获取省级选项
-    fetchProvinceOptions() {
-      getProvince().then(response => {
-        this.provinceBuffer = response;
-      })
-    },
-    handleProvinceChange(row) {
-      this.cityBuffer = [];
-      this.countyBuffer = [];
-      row.addressCity = '';
-      row.addressCounty = '';
-      if (row.addressProvince) {
-        getCity(row.addressProvince).then(response => {
-          this.cityBuffer = response;
-        })
-      }
-    },
-    handleCityChange(row) {
-      this.countyBuffer = [];
-      row.addressCounty = '';
-      if (row.addressCity) {
-        getCounty(row.addressCity).then(response => {
-          this.countyBuffer = response;
-        })
-      }
-    },
+```java
+@Transactional(rollbackFor = Exception.class)
+    @Override
+    public int insertPurchaseReturn(PurchaseReturn purchaseReturn)
+    {
+        purchaseReturn.setCreatedBy(SecurityUtils.getLoginUser().getUser().getNickName());
+        purchaseReturn.setCreatedAt(new Date());
+        purchaseReturn.setDelFlag("0");
+        purchaseReturn.setSubmitStatus("0"); //设置为未提交
+        purchaseReturn.setApprovalStatus("0"); // 设置为待审核
+
+        // 校验所有子项，确保全部通过
+        if(purchaseReturn.getPurchaseReturnChildList() != null){
+            for(PurchaseReturnChild child : purchaseReturn.getPurchaseReturnChildList()){
+                // 已提交的退货数量
+                Map<String, Object> params = new HashMap<>();
+                params.put("commodityNumber", child.getCommodityNumber());
+                params.put("commodityUnit", child.getCommodityUnit());
+                params.put("orderId", child.getOrderId());
+                Long haveReturnedQuantity = purchaseReturnChildMapper.getHaveReturnedQuantity(params);
+                // 检查退货数量是否超过可退货数量
+                if(
+                        (child.getBackQuantity() != null ? child.getBackQuantity() : 0L ) +
+                        (haveReturnedQuantity != null ? haveReturnedQuantity : 0L) >
+                        child.getQuantity()
+                ){
+                    return -1; // 退货数量超过可退货数量
+                }
+            }
+
+        }
+        // 通过校验之后先插入主表
+        int result = purchaseReturnMapper.insertPurchaseReturn(purchaseReturn);
+        if (result == 0) {
+            throw new RuntimeException("插入采购退货主表失败");
+        }
+        // 插入子表
+        if (purchaseReturn.getPurchaseReturnChildList() != null
+                && !purchaseReturn.getPurchaseReturnChildList().isEmpty()) {
+            for (PurchaseReturnChild child : purchaseReturn.getPurchaseReturnChildList()) {
+                child.setReturnId(purchaseReturn.getReturnId());
+                child.setOrderId(child.getOrderId());
+                purchaseReturnChildMapper.insertPurchaseReturnChild(child); // 子表插入
+            }
+
+        }
+        return 1;
+    }
 ```
 
