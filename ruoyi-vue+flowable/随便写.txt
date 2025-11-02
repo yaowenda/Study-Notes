@@ -146,3 +146,19 @@ delete from act_ru_execution where PROC_INST_ID_ = '752597';
     }
 ```
 
+```vue
+<!-- 调拨明细表 -->
+        <el-table :data="viewForm.allotDetailList" size="small" border style="margin-top:10px">
+          <el-table-column label="库位" prop="storageLocationName" />
+          <el-table-column label="商品代码" prop="commodityNumber" />
+          <el-table-column label="商品名称" prop="commodityName" />
+          <el-table-column label="厂家" prop="clientName" />
+          <el-table-column label="品牌" prop="commodityBrand" />
+          <el-table-column label="型号" prop="commodityModel" />
+          <el-table-column label="规格" prop="commoditySpecification" />
+          <el-table-column label="库存数量" prop="inventoryNumber" />
+          <el-table-column label="出库数量" prop="outNumber" />
+        </el-table>
+      </el-form>
+```
+
