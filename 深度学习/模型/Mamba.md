@@ -1,3 +1,7 @@
+mamba的公式：https://blog.csdn.net/xian0710830114/article/details/154534027?
+
+mamba的概述：https://www.ibm.com/cn-zh/think/topics/mamba-model
+
 Mamba是基于结构化状态空间模型（SSM）的一种深度学习模型，Mamba在SSM的基础上加入了选择机制，确保其可以高效处理长序列，并且还可以达到与Transformer匹敌的模型能力。 
 
 选择状态空间？Selective State Spaces
