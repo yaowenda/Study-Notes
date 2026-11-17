@@ -1,1 +1,1 @@
-# AI Assistant Test
+# 本科部分学习笔记
